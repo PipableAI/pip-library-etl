@@ -25,18 +25,21 @@ def generate_docstring_from_pip_model(code: str) -> str:
     generating a corresponding docstring.
 
     """
-    
-    prompt = f"""<code>{code}</code>
-    <question>Document the code above</question>
-    <doc>"""
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=300)
-    doc = (
-        tokenizer.decode(outputs[0], skip_special_tokens=True)
-        .split("<doc>")[-1]
-        .split("</doc>")[0]
-    )
-    return doc
+    try:
+        prompt = f"""<code>{code}</code>
+        <question>Document the code above</question>
+        <doc>"""
+        inputs = tokenizer(prompt, return_tensors="pt")
+        outputs = model.generate(**inputs, max_new_tokens=300)
+        doc = (
+            tokenizer.decode(outputs[0], skip_special_tokens=True)
+            .split("<doc>")[-1]
+            .split("</doc>")[0]
+        )
+        return doc
+    except Exception as e:
+        message = f"Unable to generate the docs using model with error: {e}"
+        raise ValueError(message) from e
 
 
 def get_all_methods_and_functions(module: Any, module_name: str):
@@ -101,14 +104,17 @@ def generate_module_docs(module: Any, module_name: str) -> dict:
 
     # Replace 'get_all_methods_and_functions' with your actual implementation
     code_data = get_all_methods_and_functions(module, module_name)
-
+        
     for function, code in code_data.items():
         print(f"Generating docs for {function}:")
 
-        # Replace 'generate_docstring_from_pip_model' with your actual implementation
-        doc = generate_docstring_from_pip_model(code)
-
+        try:
+            doc = generate_docstring_from_pip_model(code)
+        except ValueError as e:
+            print(e)
+        
         complete_docs[function] = doc
-        print(f"Docs for {function}:\n{doc}\n")
+        
+        print(f"Doc for {function}:\n{doc}\n")
 
     return complete_docs
