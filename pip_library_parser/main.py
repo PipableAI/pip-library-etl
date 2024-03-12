@@ -36,6 +36,7 @@ def generate_docstring_from_pip_model(code: str) -> str:
             .split("<doc>")[-1]
             .split("</doc>")[0]
         )
+        doc = doc.replace("<p>", "").replace("</p>", "")
         return doc
     except Exception as e:
         message = f"Unable to generate the docs using model with error: {e}"
