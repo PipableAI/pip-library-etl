@@ -4,6 +4,11 @@ from typing import Any
 
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+DEVICE = "cuda"
+MODEL_KEY = "PipableAI/pip-code-to-doc-1.3b"
+
+model = AutoModelForCausalLM.from_pretrained(MODEL_KEY).to(DEVICE)
+tokenizer = AutoTokenizer.from_pretrained(MODEL_KEY)
 
 def generate_docstring_from_pip_model(code: str) -> str:
     """
@@ -20,10 +25,7 @@ def generate_docstring_from_pip_model(code: str) -> str:
     generating a corresponding docstring.
 
     """
-    MODEL_KEY = "PipableAI/pip-code-to-doc-1.3b"
-    device = "cuda"
-    model = AutoModelForCausalLM.from_pretrained(MODEL_KEY).to(device)
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_KEY)
+    
     prompt = f"""<code>{code}</code>
     <question>Document the code above</question>
     <doc>"""
