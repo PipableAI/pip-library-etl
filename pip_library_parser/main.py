@@ -24,7 +24,10 @@ def generate_docstring_from_pip_model(code: str) -> str:
     device = "cuda"
     model = AutoModelForCausalLM.from_pretrained(MODEL_KEY).to(device)
     tokenizer = AutoTokenizer.from_pretrained(MODEL_KEY)
-    inputs = tokenizer(code, return_tensors="pt")
+    prompt = f"""<code>{code}</code>
+    <question>Document the code above</question>
+    <doc>"""
+    inputs = tokenizer(prompt, return_tensors="pt")
     outputs = model.generate(**inputs, max_new_tokens=300)
     doc = (
         tokenizer.decode(outputs[0], skip_special_tokens=True)
