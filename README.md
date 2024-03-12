@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-pip3 install pip_library_parser
+pip3 install git+https://github.com/PipableAI/pip-library-parser
 ```
 
 ## Usage
