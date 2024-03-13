@@ -10,6 +10,7 @@ MODEL_KEY = "PipableAI/pip-code-to-doc-1.3b"
 model = AutoModelForCausalLM.from_pretrained(MODEL_KEY).to(DEVICE)
 tokenizer = AutoTokenizer.from_pretrained(MODEL_KEY)
 
+
 def generate_docstring_from_pip_model(code: str) -> str:
     """
     Generate a docstring for Python code using a local GPU-based model loaded from Hugging Face.
@@ -105,17 +106,20 @@ def generate_module_docs(module: Any, module_name: str) -> dict:
 
     # Replace 'get_all_methods_and_functions' with your actual implementation
     code_data = get_all_methods_and_functions(module, module_name)
-        
-    for function, code in code_data.items():
-        print(f"Generating docs for {function}:")
+    try:
+        for function, code in code_data.items():
+            print(f"Generating docs for {function}:")
 
-        try:
-            doc = generate_docstring_from_pip_model(code)
-        except ValueError as e:
-            print(e)
-        
-        complete_docs[function] = doc
-        
-        print(f"Doc for {function}:\n{doc}\n")
+            try:
+                doc = generate_docstring_from_pip_model(code)
+            except ValueError as e:
+                print(e)
 
-    return complete_docs
+            complete_docs[function] = doc
+
+            print(f"Doc for {function}:\n{doc}\n")
+        return complete_docs
+    except Exception as e:
+        print(f"Execution stopped midway due to {e}")
+        print("Returing the docs that are done till now")
+        return complete_docs
