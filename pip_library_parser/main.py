@@ -106,6 +106,7 @@ def generate_module_docs(module: Any, module_name: str) -> dict:
 
     # Replace 'get_all_methods_and_functions' with your actual implementation
     code_data = get_all_methods_and_functions(module, module_name)
+        
     try:
         for function, code in code_data.items():
             print(f"Generating docs for {function}:")
@@ -118,8 +119,9 @@ def generate_module_docs(module: Any, module_name: str) -> dict:
             complete_docs[function] = doc
 
             print(f"Doc for {function}:\n{doc}\n")
+
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt: Returning the latest complete_docs.")
         return complete_docs
-    except Exception as e:
-        print(f"Execution stopped midway due to {e}")
-        print("Returing the docs that are done till now")
+    else:
         return complete_docs
