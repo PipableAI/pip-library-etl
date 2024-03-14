@@ -84,7 +84,7 @@ def get_all_methods_and_functions(module: Any, module_name: str):
                     function_to_code_data[complete_path] = str(inspect.getsource(obj))
         except TypeError as e:
             print(
-                f"Unable to extract code for function {complete_path} with Error: {e}"
+                f"Unable to extract code for {path} with Error: {e}"
             )
 
     _helper_function(module, module_name)
