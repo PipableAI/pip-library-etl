@@ -13,12 +13,17 @@ pip3 install git+https://github.com/PipableAI/pip-library-parser
 ### Generate Docstrings for Functions and Methods
 
 ```python
-from pip_library_parser import generate_module_docs
+from pip_library_parser import CodeToDocGenerator
 
-# Replace 'your_module' and 'your_module_name' with the actual module and module name
+# Replace 'your_module' and 'YourModule' with the actual module and module name
 module_name = 'your_module'
 module = __import__(module_name)
-docs = generate_module_docs(module, module_name)
+
+# Instantiate the CodeToDocGenerator
+generator = CodeToDocGenerator()
+
+# Generate docstrings for the module's functions and methods
+docs = generator.generate_module_docs(module, module_name)
 
 # 'docs' now contains a dictionary mapping function/method names to their generated docstrings
 ```
@@ -26,16 +31,28 @@ docs = generate_module_docs(module, module_name)
 ### Example: Generate Docstring for a Single Code snippet
 
 ```python
-from pip_library_parser import generate_docstring_from_pip_model
+from pip_library_parser import CodeToDocGenerator
+
+# Instantiate the CodeToDocGenerator
+generator = CodeToDocGenerator()
 
 code_snippet = """
 def example_function(x):
     return x * 2
 """
 
-docstring = generate_docstring_from_pip_model(code_snippet)
+docstring = generator.generate_docstring_from_pip_model(code_snippet)
 print("Generated Docstring:")
 print(docstring)
+```
+
+### Changing Model and Device
+
+The `CodeToDocGenerator` class allows you to change the huggingface pip model and device while initializing the object. By default, it uses the model key `PipableAI/pip-code-to-doc-1.3b` and the device `cuda`. You can specify different models and devices by providing arguments during initialization. (Make sure the prompt of the new model is same as that of `PipableAI/pip-code-to-doc-1.3b`)
+
+```python
+# Example: Instantiate CodeToDocGenerator with a different model and device
+generator = CodeToDocGenerator(model_key="your_custom_model", device="cpu")
 ```
 
 ## How It Works
@@ -55,4 +72,3 @@ Feel free to contribute to the project by opening issues or submitting pull requ
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-```
