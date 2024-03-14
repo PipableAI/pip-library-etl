@@ -49,7 +49,7 @@ class CodeToDocGenerator:
                 .split("<doc>")[-1]
                 .split("</doc>")[0]
             )
-            doc = doc.replace("<p>", "").replace("</p>", "")
+            doc = doc.replace("<p>", "").replace("</p>", "").replace("<function_description>", "").replace("</function_description>", "")
             return doc
         except Exception as e:
             message = f"Unable to generate the docs using model with error: {e}"
