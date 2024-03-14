@@ -38,8 +38,9 @@ class CodeToDocGenerator:
         try:
             if self.model is None or self.tokenizer is None:
                 self.load_model()
-            prompt = f"""<code>{code}</code>
-            <question>Document the code above</question>
+            prompt = f"""
+            <function_code>{code}</function_code>
+            <question>Give one line description of the python code above in natural language.</question>
             <doc>"""
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model.generate(**inputs, max_new_tokens=300)
