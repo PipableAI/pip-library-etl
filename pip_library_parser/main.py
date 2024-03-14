@@ -95,9 +95,7 @@ class CodeToDocGenerator:
                             inspect.getsource(obj)
                         )
             except TypeError as e:
-                print(
-                    f"Unable to extract code for function {complete_path} with Error: {e}"
-                )
+                print(f"Unable to extract code for {path} with Error: {e}")
 
         _helper_function(module, module_name)
         return function_to_code_data
