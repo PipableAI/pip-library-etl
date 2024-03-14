@@ -106,7 +106,7 @@ def generate_module_docs(module: Any, module_name: str) -> dict:
 
     # Replace 'get_all_methods_and_functions' with your actual implementation
     code_data = get_all_methods_and_functions(module, module_name)
-        
+
     try:
         for function, code in code_data.items():
             print(f"Generating docs for {function}:")
