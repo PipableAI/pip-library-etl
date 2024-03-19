@@ -38,10 +38,23 @@ class CodeToDocGenerator:
         try:
             if self.model is None or self.tokenizer is None:
                 self.load_model()
-            prompt = f"""
+            prompt=f'''
+            <example_response>
+            --code:def function_2(x): return x / 2
+            --question:Document the code
+            --doc:
+            Description:This function takes a number and divides it by 2.
+            Parameters:
+            - x (numeric): The input value to be divided by 2.
+            Returns:
+            - float: The result of x divided by 2
+            Example:
+            To call the function, use the following code:
+                function2(1.0)
+            </example_response>
             <function_code>{code}</function_code>
-            <question>Give one line description of the python code above in natural language.</question>
-            <doc>"""
+            <question>Document the python code above giving function description ,parameters and return type and example how to call the function</question>
+            <doc>'''
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model.generate(**inputs, max_new_tokens=300)
             doc = (
