@@ -59,7 +59,7 @@ class PipEtl:
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>'''
             inputs = self.tokenizer(prompt, return_tensors="pt")
-            outputs = self.model.generate(**inputs, max_new_tokens=400)
+            outputs = self.model.generate(**inputs, max_new_tokens=450)
             doc = (
                 self.tokenizer.decode(outputs[0], skip_special_tokens=True)
                 .split("<doc>")[-1]
