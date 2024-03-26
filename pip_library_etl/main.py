@@ -109,7 +109,7 @@ class PipEtl:
         else:
             return complete_docs
     
-    def generate_sql(self, schema: str, question: str, instructions: str = None, example: str = None) -> str:
+    def generate_sql(self, schema: str, question: str, instructions: str = None, examples: str = None) -> str:
         """
         Generate SQL queries based on the provided schema and question.
 
@@ -117,7 +117,7 @@ class PipEtl:
             schema (str): The schema for the SQL query.
             question (str): The question related to the SQL query.
             instructions (str, optional): Additional instructions for generating the SQL query. Defaults to None.
-            example (str, optional): An example for generating the SQL query. Defaults to None.
+            examples (str, optional): An examples for generating the SQL query. Defaults to None.
 
         Returns:
             str: The generated SQL query.
@@ -135,8 +135,8 @@ class PipEtl:
             if instructions:
                 prompt += f"\n<instructions>{instructions}</instructions>"
 
-            if example:
-                prompt += f"\n<example>{example}</example>"
+            if examples:
+                prompt += f"\n<example>{examples}</example>"
 
             prompt += f'''
             <schema>{schema}</schema>
