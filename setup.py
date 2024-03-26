@@ -6,7 +6,7 @@ with open("README.md", "r", encoding="UTF-8") as f:
     long_description = f.read()
 
 setup(
-    name="pip_library_parser",
+    name="pip_library_etl",
     version=__version__,
     packages=find_packages(),
     long_description=long_description,
