@@ -9,6 +9,7 @@ class PipEtl:
     """
     Class for generating documentation and SQL queries using a Pipable model.
     """
+
     def __init__(self, model_key="PipableAI/pip-library-etl-1.3b", device="cuda"):
         self.device = device
         self.model_key = model_key
@@ -41,7 +42,7 @@ class PipEtl:
         try:
             if self.model is None or self.tokenizer is None:
                 self._load_model()
-            prompt=f'''
+            prompt = f"""
            <example_response>
             --code:def divide_by_two(x: float) -> float: return x / 2
             --question:Document the python code above giving function description ,parameters and return type and example on how to call the function
@@ -57,7 +58,7 @@ class PipEtl:
             <function_code>{code}</function_code>
             <instructions> Use the exact path/name of function from the function_code for the example on how to call the function </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
-            <doc>'''
+            <doc>"""
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model.generate(**inputs, max_new_tokens=450)
             doc = (
@@ -65,7 +66,12 @@ class PipEtl:
                 .split("<doc>")[-1]
                 .split("</doc>")[0]
             )
-            doc = doc.replace("<p>", "").replace("</p>", "").replace("<function_description>", "").replace("</function_description>", "")
+            doc = (
+                doc.replace("<p>", "")
+                .replace("</p>", "")
+                .replace("<function_description>", "")
+                .replace("</function_description>", "")
+            )
             return doc
         except Exception as e:
             message = f"Unable to generate the docs using model with error: {e}"
@@ -105,8 +111,10 @@ class PipEtl:
             return complete_docs
         else:
             return complete_docs
-    
-    def generate_sql(self, schema: str, question: str, instructions: str = None, examples: str = None) -> str:
+
+    def generate_sql(
+        self, schema: str, question: str, instructions: str = None, examples: str = None
+    ) -> str:
         """
         Generate SQL queries based on the provided schema and question.
 
@@ -135,10 +143,10 @@ class PipEtl:
             if examples:
                 prompt += f"\n<example>{examples}</example>"
 
-            prompt += f'''
+            prompt += f"""
             <schema>{schema}</schema>
             <question>{question}</question>
-            <sql>'''
+            <sql>"""
 
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model.generate(**inputs, max_new_tokens=300)
@@ -157,7 +165,6 @@ class PipEtl:
             message = f"Unable to generate the SQL query using model with error: {e}"
             raise ValueError(message) from e
 
-        
     def _get_all_methods_and_functions(self, module: Any, module_name: str):
         """
         Retrieve methods and functions along with their source code from a module or package.
@@ -203,5 +210,3 @@ class PipEtl:
 
         _helper_function(module, module_name)
         return function_to_code_data
-
-    
