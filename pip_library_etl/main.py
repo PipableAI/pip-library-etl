@@ -5,7 +5,7 @@ from typing import Any
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
-class PipLibraryEtl:
+class PipEtl:
     """
     Class for generating documentation and SQL queries using a Pipable model.
     """

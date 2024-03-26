@@ -1,7 +1,7 @@
 from pip_library_etl.main import (
-    PipLibraryEtl
+    PipEtl
 )
 
 __all__ = [
-    "PipLibraryEtl"
+    "PipEtl"
 ]
