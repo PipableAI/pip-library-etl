@@ -43,7 +43,7 @@ class PipEtl:
                 self._load_model()
             prompt=f'''
            <example_response>
-            --code:def math.divide_by_two(x: float) -> float: return x / 2
+            --code:def divide_by_two(x: float) -> float: return x / 2
             --question:Document the python code above giving function description ,parameters and return type and example on how to call the function
             --doc:
             Description: This function divides a given number by 2.
@@ -52,7 +52,7 @@ class PipEtl:
             Returns:
             - float: The result of x divided by 2.
             Example:
-            math.divide_by_two(1.0)
+            divide_by_two(1.0)
             </example_response>
             <function_code>{code}</function_code>
             <instructions> Use the exact path/name of function from the function_code for the example on how to call the function </instructions>
