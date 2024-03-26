@@ -56,7 +56,10 @@ class PipEtl:
             divide_by_two(1.0)
             </example_response>
             <function_code>{code}</function_code>
-            <instructions> Use the exact path/name of function from the function_code for the example on how to call the function </instructions>
+            <instructions> 
+            1. In the examples while calling function use the name mentioned after `def ` in the above function_code.
+            2. In the generated docs use valid type hints as per PEP 484.
+            </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
             inputs = self.tokenizer(prompt, return_tensors="pt")
