@@ -14,6 +14,7 @@ class PipEtl:
         self.model_key = model_key
         self.model = None
         self.tokenizer = None
+        self._load_model()
 
     def _load_model(self):
         if self.model is None or self.tokenizer is None:
