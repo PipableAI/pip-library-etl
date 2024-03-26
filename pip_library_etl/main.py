@@ -62,7 +62,7 @@ class PipEtl:
             </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
-            inputs = self.tokenizer(prompt, return_tensors="pt")
+            inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
             outputs = self.model.generate(**inputs, max_new_tokens=450)
             doc = (
                 self.tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -151,7 +151,7 @@ class PipEtl:
             <question>{question}</question>
             <sql>"""
 
-            inputs = self.tokenizer(prompt, return_tensors="pt")
+            inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
             outputs = self.model.generate(**inputs, max_new_tokens=300)
 
             doc = (
