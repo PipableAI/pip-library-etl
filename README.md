@@ -1,7 +1,7 @@
 # pip_library_etl
 
 `pip_library_etl` is a Python package designed to facilitate the automatic generation of docstrings for functions and methods within a specified module and generate sql queries for a given schema. It leverages [PipableAI/pip-library-etl-1.3b](https://huggingface.co/PipableAI/pip-library-etl-1.3b) language model to analyze Python code and produce informative docstrings.
-
+For more examples refer to the [notebook](https://colab.research.google.com/drive/17PyMU_3QN9LROy7x-jmaema0cuLRzBvc?usp=sharing)
 ## Installation
 
 ```bash

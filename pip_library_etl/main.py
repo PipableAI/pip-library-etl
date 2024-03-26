@@ -68,7 +68,7 @@ class PipEtl:
             doc = doc.replace("<p>", "").replace("</p>", "").replace("<function_description>", "").replace("</function_description>", "")
             index_description = doc.find('Description:')
             if index_description != -1:
-                doc = '\t'+doc[index_description:]
+                doc = '\t\t'+doc[index_description:]
             return doc
         except Exception as e:
             message = f"Unable to generate the docs using model with error: {e}"
