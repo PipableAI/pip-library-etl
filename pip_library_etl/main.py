@@ -58,7 +58,7 @@ class PipEtl:
             <function_code>{code}</function_code>
             <instructions> 
             1. In the examples while calling function use the name mentioned after `def ` in the above function_code.
-            2. In the generated docs use valid python type hints as per PEP 484.
+            2. In the generated docs use valid python type hints as per PEP 484 or annotations from Typing library.
             </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
