@@ -156,7 +156,7 @@ class PipEtl:
 
             doc = (
                 self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-                .split("<sql>")[-1]
+                .split("<sql>")[1]
                 .split("</sql>")[0]
             )
 
