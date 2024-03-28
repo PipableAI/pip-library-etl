@@ -213,3 +213,51 @@ class PipEtl:
 
         _helper_function(module, module_name)
         return function_to_code_data
+
+    def generate_function_call(self, docstring: str, question: str):
+        """
+        Generates a function call in Python language based on a given question.
+
+        Args:
+            docstring (str): The documentation string template for the function.
+            question (str): The question prompting the function call generation.
+
+        Returns:
+            str: The Python function call generated based on the question and the provided docstring template.
+        """
+        prompt = f"""
+        Give a function call in python langugae for the following question:
+        <example_response>
+        --doc:
+        Description: This function logs a curl command in debug mode.
+        Parameters:
+        - method (str): The HTTP method to use for the request.
+        - url (str): The URL to send the request to.
+        - data (dict, optional): The data to send in the request. Defaults to None.
+        - headers (dict, optional): The headers to send with the request. Defaults to None.
+        - level (int, optional): The log level to use for this log message. Defaults to logging.DEBUG.
+        Returns:
+        - None
+        Example:
+        log_curl_debug('GET', 'https://example.com')
+        --question: log a curl PUT request for url https://web.io/
+        --function_call: log_curl_debug(method='PUT', url = 'https://web.io')
+        </example_response>
+        <doc>
+        {docstring}
+        </doc>
+        <instruction>
+        1. Strictly use named parameters mentioned in the doc to generate function calls.
+        2. Only return the response as python parsable string version of function call.
+        3. mention the 'self' parameter if required.
+        </instruction>
+        <question>
+        {question}
+        </question>
+        <function_call>
+        """
+        inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
+        outputs = self.model.generate(**inputs, max_new_tokens=200)
+        res = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        result = res.split("<function_call>")[1].split("</function_call>")[0]
+        return result
