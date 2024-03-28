@@ -56,21 +56,29 @@ instructions = """
 """
 
 schema = f"""
-<schema>CREATE TABLE department (Department_ID number,
-  Name text,
-  Creation text,
-  Ranking number,
-  Budget_in_Billions number,
-  Num_Employees number);
+<schema>
+CREATE TABLE department (
+  Department_ID number,         -- Unique identifier for the department
+  Name text,                     -- Name of the department
+  Creation text,                 -- Date of creation or establishment
+  Ranking number,                -- Ranking of the department
+  Budget_in_Billions number,     -- Budget of the department in billions
+  Num_Employees number          -- Number of employees in the department
+);
 
-  CREATE TABLE head (head_ID number,
-  name text,
-  born_state text,
-  age number);
+CREATE TABLE head (
+  head_ID number,                -- Unique identifier for the head
+  name text,                     -- Name of the head
+  born_state text,               -- State where the head was born
+  age number                     -- Age of the head
+);
 
-  CREATE TABLE management (department_ID number,
-  head_ID number,
-  temporary_acting text);</schema>
+CREATE TABLE management (
+  department_ID number,          -- Foreign key referencing Department_ID in department table
+  head_ID number,                -- Foreign key referencing head_ID in head table
+  temporary_acting text          -- Indicates if the head is temporarily acting
+);
+</schema>
 """
 
 question = "What are the names of the heads who are born outside the California state ?"
@@ -81,6 +89,37 @@ query = generator.generate_sql(schema=schema, question=question, instructions=in
 print("Generated SQL:")
 print(query)
 ```
+
+### Example: Function Calling
+```python
+docstring = """
+Function Name: make_get_req
+Description: This function is used to make a GET request.
+Parameters:
+- path (str): The path of the URL to be requested.
+- data (dict): The data to be sent in the body of the request.
+- flags (dict): The flags to be sent in the request.
+- params (dict): The parameters to be sent in the request.
+- headers (dict): The headers to be sent in the request.
+- not_json_response (bool): OPTIONAL: If set to True, the function will return the raw response content instead of trying to parse it as JSON.
+- trailing (str): OPTIONAL: For wrapping slash symbol in the end of string.
+- absolute (bool): OPTIONAL: If set to True, the function will not prefix the URL with the base URL.
+- advanced_mode (bool): OPTIONAL: If set to True, the function will return the raw response instead of trying to parse it as JSON.
+Returns:
+- Union[str, dict, list, None]: The response content as a string, a dictionary, a list, or None if the response was not successful.
+"""
+
+question = """
+Make a GET request for the URL parameter using variable_2. For the params parameter, use 'weight' as one of the keys with variable_3 as its value, and 'width' as another key with a value of 10. For the data parameter, use variable_1. Prefix the URL with the base URL, and ensure the response is in raw format.
+"""
+
+function_call = generator.generate_function_call(docstring=docstring, question=question)
+
+print(function_call)
+```
+
+
+
 ### Changing Model and Device
 
 The `PipEtl` class allows you to change the huggingface pip model and device while initializing the object. By default, it uses the model key `PipableAI/pip-library-etl-1.3b` and the device `cuda`. You can specify different models and devices by providing arguments during initialization. (Make sure the prompt of the new model is same as that of `PipableAI/pip-library-etl-1.3b`)
