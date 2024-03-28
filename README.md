@@ -12,17 +12,39 @@ pip3 install git+https://github.com/PipableAI/pip-library-etl.git
 
 ## Usage
 
+
+### NOTE
+
+If you want to try this model without using your GPU, we have hosted the model on our end.
+To run the library using the playground hosted model, initialize the generator in the following way:
+
+```python
+generator = PipEtl(device="cloud")
+```
+
+If you want to use your own GPU of the local machine (at least 10-12 GB VRAM):
+
+```python
+generator = PipEtl(device="cuda")
+```
+
+If you want to infer on the CPU of the local machine:
+
+```python
+generator = PipEtl(device="cpu")
+```
+
 ### Generate Docstrings for Functions and Methods
 
 ```python
 from pip_library_etl import PipEtl
 
+# Instantiate the PipEtl
+generator = PipEtl()
+
 # Replace 'your_module' and 'YourModule' with the actual module and module name
 module_name = 'your_module'
 module = __import__(module_name)
-
-# Instantiate the PipEtl
-generator = PipEtl()
 
 # Generate docstrings for the module's functions and methods
 docs = generator.generate_module_docs(module, module_name)

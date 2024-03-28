@@ -1,7 +1,9 @@
 import importlib
 import inspect
+import json
 from typing import Any
 
+import requests
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
@@ -10,12 +12,40 @@ class PipEtl:
     Class for generating documentation and SQL queries using a Pipable model.
     """
 
-    def __init__(self, model_key="PipableAI/pip-library-etl-1.3b", device="cuda"):
+    def __init__(
+        self,
+        model_key="PipableAI/pip-library-etl-1.3b",
+        device="cuda",
+        url="http://52.165.83.89:3100/infer",
+    ):
         self.device = device
         self.model_key = model_key
         self.model = None
         self.tokenizer = None
-        self._load_model()
+        self.url = None
+        if self.device == "cloud":
+            self.url = url
+        else:
+            self._load_model()
+
+    def query_model(self, prompt: str, max_new_tokens: int) -> str:
+        if self.device == "cloud":
+            payload = {
+                "model_name": "PipableAI/pip-library-etl-1.3b",
+                "prompt": prompt,
+                "max_new_tokens": max_new_tokens,
+            }
+            response = requests.request(
+                method="POST", url=self.url, data=payload, timeout=120
+            )
+            if response.status_code == 200:
+                return json.loads(response.text)["response"]
+            else:
+                raise Exception(f"Error generating response using {self.url}.")
+        else:
+            inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
+            outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
+            return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     def _load_model(self):
         if self.model is None or self.tokenizer is None:
@@ -40,8 +70,6 @@ class PipEtl:
 
         """
         try:
-            if self.model is None or self.tokenizer is None:
-                self._load_model()
             prompt = f"""
            <example_response>
             --code:def divide_by_two(x: float) -> float: return x / 2
@@ -62,13 +90,8 @@ class PipEtl:
             </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
-            inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-            outputs = self.model.generate(**inputs, max_new_tokens=450)
-            doc = (
-                self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-                .split("<doc>")[-1]
-                .split("</doc>")[0]
-            )
+            res = self.query_model(prompt, 450)
+            doc = res.split("<doc>")[-1].split("</doc>")[0]
             doc = (
                 doc.replace("<p>", "")
                 .replace("</p>", "")
@@ -135,9 +158,6 @@ class PipEtl:
 
         """
         try:
-            if self.model is None or self.tokenizer is None:
-                self._load_model()
-
             prompt = "Generate simple SQL queries from the schema mentioned for the following questions."
 
             if instructions:
@@ -150,19 +170,12 @@ class PipEtl:
             <schema>{schema}</schema>
             <question>{question}</question>
             <sql>"""
+            res = self.query_model(prompt, 300)
+            sql_section = res.split("<sql>")[1].split("</sql>")[0]
 
-            inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-            outputs = self.model.generate(**inputs, max_new_tokens=300)
+            sql_section = sql_section.replace("<p>", "").replace("</p>", "")
 
-            doc = (
-                self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-                .split("<sql>")[1]
-                .split("</sql>")[0]
-            )
-
-            doc = doc.replace("<p>", "").replace("</p>", "")
-
-            return doc
+            return sql_section
 
         except Exception as e:
             message = f"Unable to generate the SQL query using model with error: {e}"
@@ -256,8 +269,6 @@ class PipEtl:
         </question>
         <function_call>
         """
-        inputs = self.tokenizer(prompt, return_tensors="pt").to("cuda")
-        outputs = self.model.generate(**inputs, max_new_tokens=200)
-        res = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        res = self.query_model(prompt, 200)
         result = res.split("<function_call>")[1].split("</function_call>")[0]
         return result
