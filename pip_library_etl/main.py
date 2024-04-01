@@ -16,7 +16,7 @@ class PipEtl:
         self,
         model_key="PipableAI/pip-library-etl-1.3b",
         device="cuda",
-        url="http://172.178.123.207:3100/infer",
+        url="https://playground.pipable.ai/infer",
     ):
         self.device = device
         self.model_key = model_key
