@@ -96,7 +96,7 @@ print(function_call)
 ```
 
 
-### Generate Docstrings for Functions and Methods
+### Example: Generate Docstrings for Functions and Methods
 
 ```python
 from pip_library_etl import PipEtl
@@ -188,7 +188,7 @@ generator = PipEtl(model_key="your_custom_model", device="cpu")
 - `generate_docstring`: Utilizes a GPU-based language model to analyze Python code and generate corresponding docstrings.
 - `generate_module_docstrings`: Generates documentation for all methods and functions in a specified module.
 - `generate_sql`: Generate SQL queries based on the provided schema and question.
-
+- `generate_function_call`: Generate a function call based on question, and either a undocumented code or docstring of the related function.
 ## Dependencies
 
 - `transformers` from Hugging Face
