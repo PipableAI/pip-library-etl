@@ -6,6 +6,8 @@ from typing import Any
 import requests
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
+INFERENCE_URL = "https://playground.pipable.ai/infer"
+
 
 class PipEtl:
     """
@@ -16,7 +18,7 @@ class PipEtl:
         self,
         model_key="PipableAI/pip-library-etl-1.3b",
         device="cuda",
-        url="https://playground.pipable.ai/infer",
+        url=INFERENCE_URL,
     ):
         self.device = device
         self.model_key = model_key
@@ -28,7 +30,7 @@ class PipEtl:
         else:
             self._load_model()
 
-    def query_model(self, prompt: str, max_new_tokens: int) -> str:
+    def _query_model(self, prompt: str, max_new_tokens: int) -> str:
         if self.device == "cloud":
             payload = {
                 "model_name": "PipableAI/pip-library-etl-1.3b",
@@ -90,7 +92,7 @@ class PipEtl:
             </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
-            res = self.query_model(prompt, 450)
+            res = self._query_model(prompt, 450)
             doc = res.split("<doc>")[-1].split("</doc>")[0]
             doc = (
                 doc.replace("<p>", "")
@@ -170,7 +172,7 @@ class PipEtl:
             <schema>{schema}</schema>
             <question>{question}</question>
             <sql>"""
-            res = self.query_model(prompt, 300)
+            res = self._query_model(prompt, 300)
             sql_section = res.split("<sql>")[1].split("</sql>")[0]
 
             sql_section = sql_section.replace("<p>", "").replace("</p>", "")
@@ -227,48 +229,60 @@ class PipEtl:
         _helper_function(module, module_name)
         return function_to_code_data
 
-    def generate_function_call(self, docstring: str, question: str):
+    def generate_function_call(
+        self,
+        question: str,
+        docstring: str = None,
+        code: str = None,
+    ) -> str:
         """
-        Generates a function call in Python language based on a given question.
+        Generates a function call in Python language based on a given question, and either the docstring of the function or a undocuemneted code.
 
         Args:
             docstring (str): The documentation string template for the function.
             question (str): The question prompting the function call generation.
-
+            code (str, optional): The code of the function. This can be used when the docstring is not present.
         Returns:
             str: The Python function call generated based on the question and the provided docstring template.
         """
-        prompt = f"""
-        Give a function call in python langugae for the following question:
-        <example_response>
-        --doc:
-        Description: This function logs a curl command in debug mode.
-        Parameters:
-        - method (str): The HTTP method to use for the request.
-        - url (str): The URL to send the request to.
-        - data (dict, optional): The data to send in the request. Defaults to None.
-        - headers (dict, optional): The headers to send with the request. Defaults to None.
-        - level (int, optional): The log level to use for this log message. Defaults to logging.DEBUG.
-        Returns:
-        - None
-        Example:
-        log_curl_debug('GET', 'https://example.com')
-        --question: log a curl PUT request for url https://web.io/
-        --function_call: log_curl_debug(method='PUT', url = 'https://web.io')
-        </example_response>
-        <doc>
-        {docstring}
-        </doc>
-        <instruction>
-        1. Strictly use named parameters mentioned in the doc to generate function calls.
-        2. Only return the response as python parsable string version of function call.
-        3. mention the 'self' parameter if required.
-        </instruction>
-        <question>
-        {question}
-        </question>
-        <function_call>
-        """
-        res = self.query_model(prompt, 200)
-        result = res.split("<function_call>")[1].split("</function_call>")[0]
-        return result
+        try:
+            if docstring is None and code is None:
+                raise ValueError("Provide either code or docstring.")
+            if docstring is None:
+                docstring = self.generate_docstring(code=code)
+            prompt = f"""
+            Give a function call in python langugae for the following question:
+            <example_response>
+            --doc:
+            Description: This function logs a curl command in debug mode.
+            Parameters:
+            - method (str): The HTTP method to use for the request.
+            - url (str): The URL to send the request to.
+            - data (dict, optional): The data to send in the request. Defaults to None.
+            - headers (dict, optional): The headers to send with the request. Defaults to None.
+            - level (int, optional): The log level to use for this log message. Defaults to logging.DEBUG.
+            Returns:
+            - None
+            Example:
+            log_curl_debug('GET', 'https://example.com')
+            --question: log a curl PUT request for url https://web.io/
+            --function_call: log_curl_debug(method='PUT', url = 'https://web.io')
+            </example_response>
+            <doc>
+            {docstring}
+            </doc>
+            <instruction>
+            1. Strictly use named parameters mentioned in the doc to generate function calls.
+            2. Only return the response as python parsable string version of function call.
+            3. mention the 'self' parameter if required.
+            </instruction>
+            <question>
+            {question}
+            </question>
+            <function_call>
+            """
+            res = self._query_model(prompt, 200)
+            result = res.split("<function_call>")[1].split("</function_call>")[0]
+            return result
+        except Exception as e:
+            raise RuntimeError(f"An error occurred: {e}")
