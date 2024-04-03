@@ -132,6 +132,26 @@ print("Generated Docstring:")
 print(docstring)
 ```
 
+### Example: Adding Docstrings to Python File
+
+```python
+from pip_library_etl import PipEtl
+
+# Instantiate the PipEtl
+generator = PipEtl()
+
+# Specify the path to the Python file
+file_path = 'your_file.py'
+
+# Add docstrings to functions in the Python file
+# If overwrite is set to True, the existing file will be overwritten with the modified content.
+# If overwrite is set to False (default), a new file with "_docstring" appended to its name will be created.
+overwrite = False
+generator.add_docstrings_to_file(file_path, overwrite)
+```
+
+
+
 ### Example: Generate SQL queries
 ```python
 
@@ -189,6 +209,9 @@ generator = PipEtl(model_key="your_custom_model", device="cpu")
 - `generate_module_docstrings`: Generates documentation for all methods and functions in a specified module.
 - `generate_sql`: Generate SQL queries based on the provided schema and question.
 - `generate_function_call`: Generate a function call based on question, and either a undocumented code or docstring of the related function.
+- `add_docstrings_to_file`: Adds docstrings to functions in a Python file and writes the modified content to a new file. If `overwrite` is `True`, the existing file will be overwritten; otherwise, a new file will be created.
+
+
 ## Dependencies
 
 - `transformers` from Hugging Face

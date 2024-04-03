@@ -2,6 +2,8 @@ import importlib
 import inspect
 import json
 from typing import Any
+import os
+import ast
 
 import requests
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -286,3 +288,49 @@ class PipEtl:
             return result
         except Exception as e:
             raise RuntimeError(f"An error occurred: {e}")
+
+
+    def add_docstrings_to_file(self, file_path, overwrite=False):
+        """
+        Reads a Python file, generates docstrings for its functions, adds the docstrings to the functions,
+        and writes the modified content to a new file.
+
+        Args:
+        - file_path (str): The path to the original Python file.
+        - overwrite (bool): If True, overwrite the existing file with the same name. If False, write a new file with "_docstring" added.
+        """
+        import os
+        import ast
+
+        base_path = os.path.dirname(file_path)
+        file_name, ext = os.path.splitext(os.path.basename(file_path))
+        output_file_path = os.path.join(base_path, f"{file_name}_docstring{ext}") if not overwrite else file_path
+
+        # Read the original Python file
+        with open(file_path, "r") as file:
+            code = file.read()
+
+        # Parse the code to get functions and their code
+        tree = ast.parse(code)
+        function_code_map = {}
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                function_code_map[node.name] = node
+
+        # Generate and add docstrings to functions
+        for func_name, func_node in function_code_map.items():
+            # Skip functions that already have docstrings
+            if func_node.body and isinstance(func_node.body[0], ast.Expr) and isinstance(func_node.body[0].value, ast.Str):
+                continue
+
+            # Generate docstring
+            docstring = self.generate_docstring(ast.unparse(func_node))
+            # Add docstring to function
+            func_node.body.insert(0, ast.Expr(ast.Str(docstring)))
+
+        # Reconstruct the modified code
+        modified_code = ast.unparse(tree)
+
+        # Write the modified content to a new file
+        with open(output_file_path, "w") as output_file:
+            output_file.write(modified_code)
