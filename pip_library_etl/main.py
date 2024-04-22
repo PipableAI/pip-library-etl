@@ -35,7 +35,7 @@ class PipEtl:
     def _query_model(self, prompt: str, max_new_tokens: int) -> str:
         if self.device == "cloud":
             payload = {
-                "model_name": "PipableAI/pip-library-etl-1.3b",
+                "model_name": self.model_key,
                 "prompt": prompt,
                 "max_new_tokens": max_new_tokens,
             }
