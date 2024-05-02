@@ -64,7 +64,7 @@ class PipPlanner(PipBaseClass):
                 print(f"Unable to register function {function} with error {e}.")
 
     def generate_plan(
-        self, question: str, instructions: str = "", max_new_tokens: int = 1360
+        self, question: str, instructions: str = "", max_new_tokens: int = 900
     ) -> Plan:
         """
         Generates a plan based on the given question and instructions.
@@ -89,6 +89,7 @@ class PipPlanner(PipBaseClass):
         """
         try:
             prompt = self._generate_prompt(question, instructions)
+            # print(prompt)
             response = self._query_model(prompt, max_new_tokens)
             response = response.replace("None", "null")
             response = response.split("<json>")[1].split("</json>")[0]
