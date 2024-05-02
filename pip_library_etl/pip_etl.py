@@ -1,62 +1,26 @@
+import ast
 import importlib
 import inspect
-import json
-from typing import Any
 import os
-import ast
+from types import ModuleType
 
-import requests
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from pip_library_etl.pip_base_class import PipBaseClass
 
 INFERENCE_URL = "https://playground.pipable.ai/infer"
 
 
-class PipEtl:
+class PipEtl(PipBaseClass):
     """
     Class for generating documentation and SQL queries using a Pipable model.
     """
 
     def __init__(
         self,
-        model_key="PipableAI/pip-library-etl-1.3b",
-        device="cuda",
-        url=INFERENCE_URL,
+        model_key: str = "PipableAI/pip-library-etl-1.3b",
+        device: str = "cuda",
+        url: str = INFERENCE_URL,
     ):
-        self.device = device
-        self.model_key = model_key
-        self.model = None
-        self.tokenizer = None
-        self.url = None
-        if self.device == "cloud":
-            self.url = url
-        else:
-            self._load_model()
-
-    def _query_model(self, prompt: str, max_new_tokens: int) -> str:
-        if self.device == "cloud":
-            payload = {
-                "model_name": self.model_key,
-                "prompt": prompt,
-                "max_new_tokens": max_new_tokens,
-            }
-            response = requests.request(
-                method="POST", url=self.url, data=payload, timeout=120
-            )
-            if response.status_code == 200:
-                return json.loads(response.text)["response"]
-            else:
-                raise Exception(f"Error generating response using {self.url}.")
-        else:
-            inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device)
-            outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
-            return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    def _load_model(self):
-        if self.model is None or self.tokenizer is None:
-            self.model = AutoModelForCausalLM.from_pretrained(self.model_key).to(
-                self.device
-            )
-            self.tokenizer = AutoTokenizer.from_pretrained(self.model_key)
+        super().__init__(model_key, device, url)
 
     def generate_docstring(self, code: str) -> str:
         """
@@ -107,12 +71,12 @@ class PipEtl:
             message = f"Unable to generate the docs using model with error: {e}"
             raise ValueError(message) from e
 
-    def generate_module_docstrings(self, module: Any, module_name: str) -> dict:
+    def generate_module_docstrings(self, module: ModuleType, module_name: str) -> dict:
         """
         Generate documentation for all methods and functions in a given module.
 
         Args:
-        - module (Any): The module or package to inspect.
+        - module (ModuleType): The module or package to inspect.
         - module_name (str): The name of the module or package.
 
         Returns:
@@ -185,12 +149,12 @@ class PipEtl:
             message = f"Unable to generate the SQL query using model with error: {e}"
             raise ValueError(message) from e
 
-    def _get_all_methods_and_functions(self, module: Any, module_name: str):
+    def _get_all_methods_and_functions(self, module: ModuleType, module_name: str):
         """
         Retrieve methods and functions along with their source code from a module or package.
 
         Args:
-        - module (Any): The module or package to inspect.
+        - module (ModuleType): The module or package to inspect.
         - module_name (str): The name of the module or package.
 
         Returns:
@@ -204,7 +168,7 @@ class PipEtl:
         function_to_code_data = {}
         already_done = {}
 
-        def _helper_function(module_or_class: Any, path: str):
+        def _helper_function(module_or_class, path):
             try:
                 for name, obj in inspect.getmembers(module_or_class):
                     if name.startswith("_"):
@@ -289,7 +253,6 @@ class PipEtl:
         except Exception as e:
             raise RuntimeError(f"An error occurred: {e}")
 
-
     def add_docstrings_to_file(self, file_path, overwrite=False):
         """
         Reads a Python file, generates docstrings for its functions, adds the docstrings to the functions,
@@ -299,15 +262,17 @@ class PipEtl:
         - file_path (str): The path to the original Python file.
         - overwrite (bool): If True, overwrite the existing file with the same name. If False, write a new file with "_docstring" added.
         """
-        import os
-        import ast
 
         base_path = os.path.dirname(file_path)
         file_name, ext = os.path.splitext(os.path.basename(file_path))
-        output_file_path = os.path.join(base_path, f"{file_name}_docstring{ext}") if not overwrite else file_path
+        output_file_path = (
+            os.path.join(base_path, f"{file_name}_docstring{ext}")
+            if not overwrite
+            else file_path
+        )
 
         # Read the original Python file
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             code = file.read()
 
         # Parse the code to get functions and their code
@@ -320,7 +285,11 @@ class PipEtl:
         # Generate and add docstrings to functions
         for func_name, func_node in function_code_map.items():
             # Skip functions that already have docstrings
-            if func_node.body and isinstance(func_node.body[0], ast.Expr) and isinstance(func_node.body[0].value, ast.Str):
+            if (
+                func_node.body
+                and isinstance(func_node.body[0], ast.Expr)
+                and isinstance(func_node.body[0].value, ast.Str)
+            ):
                 continue
 
             # Generate docstring
@@ -332,5 +301,5 @@ class PipEtl:
         modified_code = ast.unparse(tree)
 
         # Write the modified content to a new file
-        with open(output_file_path, "w") as output_file:
+        with open(output_file_path, "w", encoding="utf-8") as output_file:
             output_file.write(modified_code)
