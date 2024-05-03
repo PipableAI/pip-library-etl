@@ -89,7 +89,6 @@ class PipPlanner(PipBaseClass):
         """
         try:
             prompt = self._generate_prompt(question, instructions)
-            # print(prompt)
             response = self._query_model(prompt, max_new_tokens)
             response = response.replace("None", "null")
             response = response.split("<json>")[1].split("</json>")[0]
@@ -121,44 +120,48 @@ class PipPlanner(PipBaseClass):
       "function_name": "some_library.some_function",
       "parameters": [
         {{
-        "name":"self",
-        "value":"The corresponding value for self",
-        "description": "An explanation of why the above mentioned value should be utilized for this parameter.",
+        "name":"name of this parameter according to annotations.",
+        "value":"value to be passed for this parameter",
+        "dtype":"type annotation of the variable",
+        "description": "An explanation of why this value should be utilized.",
         }},
         {{
-        "name":"Name of this parameter.",
+        "name":"name of this parameter according to annotations..",
         "value":"value to be passed for this parameter.",
+        "dtype":"type annotation of the variable",
         "description": "An explanation of why the above mentioned value should be utilized for this parameter.",
         }}
       ],
-      "output": ["variable_1"],
+      "outputs": ["variable_1"],
       "description": "some description",
     }},
     {{
       "task_id": 2,
       "function_name": "some_library_2.some_random_function",
       "parameters": [
-        {{
-        "name":"Name of this parameter",
-        "value":"value to be passed for this parameter.",
-        "description": "An explanation of why the above mentioned value should be utilized for this parameter.",
+        {{,
+        "name":"name of this parameter according to annotations.",
+        "value":"value to be passed for this parameter",
+        "dtype":"type annotation of the variable",
+        "description": "An explanation of why this value should be utilized.",
         }},
-        {{
-        "name":"name of param",
-        "value":"value in the dtype mentioned in annotations for the param",
-        "description": "An explanation of why the above mentioned value should be utilized for this parameter.",
-        }}
+        {{,
+        "name":"name of this parameter according to annotations.",
+        "value":"value to be passed for this parameter",
+        "dtype":"type annotation of the variable",
+        "description": "An explanation of why this value should be utilized.",
+        }},
       ],
-      "output": ["variable_2"],
+      "outputs": ["variable_2"],
       "description": "some description",
     }}
   ]
 }}
 </json_structure>
 <instructions>
-- use self parameter with proper value based on the question.
-- name outputs as variable1 , variable2 and so on in chronological order.
-- give attention to the type annotation of the parameter while filling values for it.
+- Use self in parameter name to refer to the current object.
+- Try to name outputs as variable1 , variable2 and so on in chronological order.
+- Give attention to the type annotation of the parameter while filling values for it.
 {instructions}
 </instructions>
 <question>

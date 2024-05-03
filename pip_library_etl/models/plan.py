@@ -7,6 +7,7 @@ class Parameter(BaseModel):
     name: str
     value: Any
     description: str
+    dtype: str
 
 
 class Task(BaseModel):
