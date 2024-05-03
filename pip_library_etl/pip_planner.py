@@ -112,7 +112,6 @@ class PipPlanner(PipBaseClass):
 {func_info}
 </functions>
 <json_structure>
-- In the parameters key, the value should be a list of json objects, each json object should correspond to the parameters of the function required to execute the task.
 {{
   "tasks": [
     {{
@@ -145,6 +144,12 @@ class PipPlanner(PipBaseClass):
         "dtype":"type annotation of the variable",
         "description": "An explanation of why this value should be utilized.",
         }},
+        {{
+        "name":"self",
+        "value":"variable name to be passed for this parameter self.",
+        "dtype":"type annotation of the self parameter",
+        "description": "An explanation of why the cariable should be used for this self parameter.",
+        }},
         {{,
         "name":"name of this parameter according to annotations.",
         "value":"value to be passed for this parameter",
@@ -159,9 +164,10 @@ class PipPlanner(PipBaseClass):
 }}
 </json_structure>
 <instructions>
-- Use self in parameter name to refer to the current object.
-- Try to name outputs as variable1 , variable2 and so on in chronological order.
-- Give attention to the type annotation of the parameter while filling values for it.
+1. Include self as parameter name in the parameters list if mentioned on the function's annotation for some task.
+2. Use self as parameter name in the parameters list if mentioned on the function's annotation for some task.
+3. Try to name outputs as variable1 , variable2 and so on in chronological order.
+4. Give attention to the type annotation of the parameter while filling values for it.
 {instructions}
 </instructions>
 <question>
