@@ -22,7 +22,7 @@ class PipEtl(PipBaseClass):
     ):
         super().__init__(model_key, device, url)
 
-    def generate_docstring(self, code: str) -> str:
+    def generate_docstring(self, code: str, max_new_tokens: int = 500) -> str:
         """
         Generate a docstring for Python code using a local GPU-based model loaded from Hugging Face.
 
@@ -58,7 +58,7 @@ class PipEtl(PipBaseClass):
             </instructions>
             <question>Document the python code above giving function description ,parameters and return type and example on how to call the function</question>
             <doc>"""
-            res = self._query_model(prompt, 450)
+            res = self._query_model(prompt, max_new_tokens)
             doc = res.split("<doc>")[-1].split("</doc>")[0]
             doc = (
                 doc.replace("<p>", "")
@@ -71,7 +71,9 @@ class PipEtl(PipBaseClass):
             message = f"Unable to generate the docs using model with error: {e}"
             raise ValueError(message) from e
 
-    def generate_module_docstrings(self, module: ModuleType, module_name: str) -> dict:
+    def generate_module_docstrings(
+        self, module: ModuleType, module_name: str, max_new_tokens: int = 500
+    ) -> dict:
         """
         Generate documentation for all methods and functions in a given module.
 
@@ -92,7 +94,7 @@ class PipEtl(PipBaseClass):
                 print(f"Generating docs for {function}:")
 
                 try:
-                    doc = self.generate_docstring(code)
+                    doc = self.generate_docstring(code, max_new_tokens)
                 except ValueError as e:
                     print(e)
 
@@ -107,7 +109,12 @@ class PipEtl(PipBaseClass):
             return complete_docs
 
     def generate_sql(
-        self, schema: str, question: str, instructions: str = None, examples: str = None
+        self,
+        schema: str,
+        question: str,
+        instructions: str = None,
+        examples: str = None,
+        max_new_tokens: int = 400,
     ) -> str:
         """
         Generate SQL queries based on the provided schema and question.
@@ -138,7 +145,7 @@ class PipEtl(PipBaseClass):
             <schema>{schema}</schema>
             <question>{question}</question>
             <sql>"""
-            res = self._query_model(prompt, 300)
+            res = self._query_model(prompt, max_new_tokens)
             sql_section = res.split("<sql>")[1].split("</sql>")[0]
 
             sql_section = sql_section.replace("<p>", "").replace("</p>", "")
@@ -200,6 +207,7 @@ class PipEtl(PipBaseClass):
         question: str,
         docstring: str = None,
         code: str = None,
+        max_new_tokens: int = 500,
     ) -> str:
         """
         Generates a function call in Python language based on a given question, and either the docstring of the function or a undocuemneted code.
@@ -215,7 +223,9 @@ class PipEtl(PipBaseClass):
             if docstring is None and code is None:
                 raise ValueError("Provide either code or docstring.")
             if docstring is None:
-                docstring = self.generate_docstring(code=code)
+                docstring = self.generate_docstring(
+                    code=code, max_new_tokens=max_new_tokens
+                )
             prompt = f"""
             Give a function call in python langugae for the following question:
             <example_response>
@@ -253,7 +263,9 @@ class PipEtl(PipBaseClass):
         except Exception as e:
             raise RuntimeError(f"An error occurred: {e}")
 
-    def add_docstrings_to_file(self, file_path, overwrite=False):
+    def add_docstrings_to_file(
+        self, file_path, overwrite=False, max_new_tokens: int = 500
+    ):
         """
         Reads a Python file, generates docstrings for its functions, adds the docstrings to the functions,
         and writes the modified content to a new file.
@@ -293,7 +305,7 @@ class PipEtl(PipBaseClass):
                 continue
 
             # Generate docstring
-            docstring = self.generate_docstring(ast.unparse(func_node))
+            docstring = self.generate_docstring(ast.unparse(func_node), max_new_tokens)
             # Add docstring to function
             func_node.body.insert(0, ast.Expr(ast.Str(docstring)))
 
