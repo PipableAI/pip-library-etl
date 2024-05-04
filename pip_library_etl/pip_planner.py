@@ -122,17 +122,23 @@ class PipPlanner(PipBaseClass):
         "name":"name of this parameter according to annotations.",
         "value":"value to be passed for this parameter",
         "dtype":"type annotation of the variable",
-        "description": "An explanation of why this value should be utilized.",
+        "description": "An explanation of why this value should be utilized."
         }},
         {{
         "name":"name of this parameter according to annotations..",
         "value":"value to be passed for this parameter.",
         "dtype":"type annotation of the variable",
-        "description": "An explanation of why the above mentioned value should be utilized for this parameter.",
+        "description": "An explanation of why the above mentioned value should be utilized for this parameter."
+        }},
+        {{
+        "name":"self",
+        "value":"variable name to be passed for this parameter self.",
+        "dtype":"type annotation of the self parameter",
+        "description": "An explanation of why the cariable should be used for this self parameter."
         }}
       ],
       "outputs": ["variable_1"],
-      "description": "some description",
+      "description": "some description"
     }},
     {{
       "task_id": 2,
@@ -142,32 +148,32 @@ class PipPlanner(PipBaseClass):
         "name":"name of this parameter according to annotations.",
         "value":"value to be passed for this parameter",
         "dtype":"type annotation of the variable",
-        "description": "An explanation of why this value should be utilized.",
+        "description": "An explanation of why this value should be utilized."
         }},
         {{
         "name":"self",
         "value":"variable name to be passed for this parameter self.",
         "dtype":"type annotation of the self parameter",
-        "description": "An explanation of why the cariable should be used for this self parameter.",
+        "description": "An explanation of why the cariable should be used for this self parameter."
         }},
         {{,
         "name":"name of this parameter according to annotations.",
         "value":"value to be passed for this parameter",
         "dtype":"type annotation of the variable",
-        "description": "An explanation of why this value should be utilized.",
-        }},
+        "description": "An explanation of why this value should be utilized."
+        }}
       ],
       "outputs": ["variable_2"],
-      "description": "some description",
+      "description": "some description"
     }}
   ]
 }}
 </json_structure>
 <instructions>
-1. Include self as parameter name in the parameters list if mentioned on the function's annotation for some task.
-2. Use self as parameter name in the parameters list if mentioned on the function's annotation for some task.
-3. Try to name outputs as variable1 , variable2 and so on in chronological order.
-4. Give attention to the type annotation of the parameter while filling values for it.
+<instructions>
+- use self parameter with proper value based on the question.
+- name outputs as variable_1 , variable_2 , variable_3 , variable_4 and more variables in chronological order.
+- give attention to the type annotation of the parameter given while filling values.
 {instructions}
 </instructions>
 <question>
