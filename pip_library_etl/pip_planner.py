@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import inspect
 from typing import List
 
@@ -41,13 +42,13 @@ class PipPlanner(PipBaseClass):
         except Exception as e:
             raise Exception(f"Unable to add function {name} with error {e}.")
 
-    def register_functions(self, functions: List[callable]):
+    def register_functions(self, functions: List[callable], use_model_docs = False):
         """
         Registers a list of callable functions with the planner.
 
         Args:
             functions (List[callable]): A list of callable functions to be registered.
-
+            use_model_docs = False (bool): Whether to use the model-generated documentation for the functions. Defaults to False.
         Raises:
             Exception: If there is an error while registering a function. The exception message will include the name of the function and the error message.
 
@@ -58,6 +59,11 @@ class PipPlanner(PipBaseClass):
             try:
                 signature = str(inspect.signature(function))
                 docs = function.__doc__
+                if use_model_docs:
+                    try:
+                        docs = self._generate_docs(function)
+                    except Exception as e:
+                        print(f"Unable to generate docs for function using model.{e}")
                 name = function.__name__
                 self.add_function(signature, docs, name)
             except Exception as e:
@@ -184,3 +190,49 @@ Given the above functions,
 <json>
 """
         return prompt
+
+    def plan_to_code(self, plan: Plan, max_new_tokens= 600) -> str:
+        """
+        Generates a Python code from a Plan object with comments for each task.
+        Args:
+            plan (Plan): The Plan object containing the tasks.
+            max_new_tokens (int, optional): The maximum number of tokens for model querying. Defaults to 600.
+        Returns:
+            str: The generated Python code with comments.
+        Raises:
+            ValueError: If unable to generate the code with an error message.
+        """
+        prompt = f"""
+<json>
+{str(plan)}
+</json>
+<question>
+Given the above plan json, Only write a python code and add proper comments above each code line.
+</question>
+<response>
+"""
+        try:
+            response = self._query_model(prompt, max_new_tokens)
+            response = response.replace("None", "null")
+            response = response.split("<response>")[1].split("</response>")[0]
+            return response
+        except Exception as e:
+            raise ValueError(f"Unable to generate the code with error: {e}") from e
+    
+    def _generate_docs(self,function, max_new_tokens = 500) -> str:
+        prompt = f'''
+<function_code>
+{inspect.getsource(function)}
+</function_code>
+<question>
+Document the function above giving the function description , parameter name and description , dtypes , possible param values, default param value and return type.
+</question>
+<doc>
+'''
+        try:
+            response = self._query_model(prompt, max_new_tokens)
+            response = response.replace("None", "null")
+            response = response.split("<doc>")[1].split("</doc>")[0]
+            return response
+        except Exception as e:
+            raise ValueError(f"Unable to generate the code with error: {e}") from e
