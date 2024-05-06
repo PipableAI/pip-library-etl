@@ -23,7 +23,7 @@ class PipPlanner(PipBaseClass):
         super().__init__(model_key, device, url)
         self.functions: List[Function] = []
 
-    def add_function(self, signature: str, docs: str, name: str):
+    def add_function(self, signature: str, docs: str, name: str, full_name: str):
         """
         A function to add a new function to the planner functions list if it is not already present.
 
@@ -36,13 +36,15 @@ class PipPlanner(PipBaseClass):
             None
         """
         try:
-            func = Function(signature=signature, docs=docs, name=name)
+            func = Function(
+                signature=signature, docs=docs, name=name, full_name=full_name
+            )
             if func not in self.functions:
                 self.functions.append(func)
         except Exception as e:
             raise Exception(f"Unable to add function {name} with error {e}.")
 
-    def register_functions(self, functions: List[callable], use_model_docs = False):
+    def register_functions(self, functions: List[callable], use_model_docs=False):
         """
         Registers a list of callable functions with the planner.
 
@@ -65,7 +67,8 @@ class PipPlanner(PipBaseClass):
                     except Exception as e:
                         print(f"Unable to generate docs for function using model.{e}")
                 name = function.__name__
-                self.add_function(signature, docs, name)
+                full_name = function.__module__ + "." + function.__qualname__
+                self.add_function(signature, docs, name, full_name)
             except Exception as e:
                 print(f"Unable to register function {function} with error {e}.")
 
@@ -179,7 +182,12 @@ Given the above functions,
 """
         return prompt
 
-    def plan_to_code(self, plan: Plan, max_new_tokens= 600) -> str:
+    def plan_to_code(self, plan: Plan, max_new_tokens=600) -> str:
+        names = []
+        for tasks in plan.tasks:
+            names.append(tasks.function_name)
+
+        full_names = [x.full_name for x in self.functions if x.name in names]
         """
         Generates a Python code from a Plan object with comments for each task.
         Args:
@@ -194,8 +202,17 @@ Given the above functions,
 <json>
 {str(plan)}
 </json>
+<instructions>
+- Use exact values of parameters in the function calls as given in the tasks of the plan.
+- Make sure that constants and the values of the parameters in the task are used in the code.
+- Also use imports wherever necessary.
+- Add proper comments above each code line.
+- Assign the values to the variables you are using.
+</instructions>
 <question>
-Given the above plan json, Only write a python code and add proper comments above each code line.
+Given the above plan, Just return a small python code that executes the plan using just these exact function calls provided in the plan.
+Functions to use:
+{full_names}
 </question>
 <response>
 """
@@ -206,9 +223,9 @@ Given the above plan json, Only write a python code and add proper comments abov
             return response
         except Exception as e:
             raise ValueError(f"Unable to generate the code with error: {e}") from e
-    
-    def _generate_docs(self,function, max_new_tokens = 500) -> str:
-        prompt = f'''
+
+    def _generate_docs(self, function, max_new_tokens=500) -> str:
+        prompt = f"""
 <function_code>
 {inspect.getsource(function)}
 </function_code>
@@ -216,7 +233,7 @@ Given the above plan json, Only write a python code and add proper comments abov
 Document the function above giving the function description , parameter name and description , dtypes , possible param values, default param value and return type.
 </question>
 <doc>
-'''
+"""
         try:
             response = self._query_model(prompt, max_new_tokens)
             response = response.replace("None", "null")
