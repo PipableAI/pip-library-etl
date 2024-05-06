@@ -122,7 +122,7 @@ class PipPlanner(PipBaseClass):
   "tasks": [
     {{
       "task_id": 1,
-      "function_name": "some_library.some_function",
+      "function_name": "function name",
       "parameters": [
         {{
         "name":"name of this parameter according to annotations.",
@@ -142,7 +142,7 @@ class PipPlanner(PipBaseClass):
     }},
     {{
       "task_id": 2,
-      "function_name": "some_library_2.some_random_function",
+      "function_name": "function name",
       "parameters": [
         {{
         "name":"self",
