@@ -131,12 +131,6 @@ class PipPlanner(PipBaseClass):
         "description": "An explanation of why this value should be utilized."
         }},
         {{
-        "name":"name of this parameter according to annotations..",
-        "value":"value to be passed for this parameter.",
-        "dtype":"type annotation of the variable",
-        "description": "An explanation of why the above mentioned value should be utilized for this parameter."
-        }},
-        {{
         "name":"self",
         "value":"variable name to be passed for this parameter self.",
         "dtype":"type annotation of the self parameter",
@@ -150,12 +144,6 @@ class PipPlanner(PipBaseClass):
       "task_id": 2,
       "function_name": "some_library_2.some_random_function",
       "parameters": [
-        {{,
-        "name":"name of this parameter according to annotations.",
-        "value":"value to be passed for this parameter",
-        "dtype":"type annotation of the variable",
-        "description": "An explanation of why this value should be utilized."
-        }},
         {{
         "name":"self",
         "value":"variable name to be passed for this parameter self.",
