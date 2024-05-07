@@ -22,6 +22,7 @@ class PipPlanner(PipBaseClass):
     ):
         super().__init__(model_key, device, url)
         self.functions: List[Function] = []
+        self.planner_templates = {}
 
     def add_function(self, signature: str, docs: str, name: str, full_name: str):
         """
@@ -111,6 +112,90 @@ class PipPlanner(PipBaseClass):
             ) from e
         return plan
 
+    def make_planner_prompt_template(
+        self,
+        key: str,
+        base_prompt: str = None,
+        instructions: str = None,
+        json_structure: str = None,
+        func_info: list[str] = None,
+    ):
+        if func_info is None:
+            func_info = [
+                f"""--name:{function.name}\n--annotations:{function.signature}\n--doc:{function.docs}\n\n"""
+                for function in self.functions
+            ]
+        if instructions is None:
+            instructions = """- use self parameter with proper value based on the question.
+- name outputs as variable_1 , variable_2 , variable_3 , variable_4 and more variables in chronological order.
+- give attention to the type annotation of the parameter given while filling values.
+"""
+        if json_structure is None:
+            json_structure = """{{
+  "tasks": [
+    {{
+      "task_id": 1,
+      "function_name": "function name",
+      "parameters": [
+        {{
+        "name":"name of this parameter according to annotations.",
+        "value":"value to be passed for this parameter",
+        "dtype":"type annotation of the variable",
+        "description": "An explanation of why this value should be utilized."
+        }},
+        {{
+        "name":"self",
+        "value":"variable name to be passed for this parameter self.",
+        "dtype":"type annotation of the self parameter",
+        "description": "An explanation of why the cariable should be used for this self parameter."
+        }}
+      ],
+      "outputs": ["variable_1"],
+      "description": "some description"
+    }},
+    {{
+      "task_id": 2,
+      "function_name": "function name",
+      "parameters": [
+        {{
+        "name":"self",
+        "value":"variable name to be passed for this parameter self.",
+        "dtype":"type annotation of the self parameter",
+        "description": "An explanation of why the cariable should be used for this self parameter."
+        }},
+        {{,
+        "name":"name of this parameter according to annotations.",
+        "value":"value to be passed for this parameter",
+        "dtype":"type annotation of the variable",
+        "description": "An explanation of why this value should be utilized."
+        }}
+      ],
+      "outputs": ["variable_2"],
+      "description": "some description"
+    }}
+  ]
+}}
+"""
+        if base_prompt is None:
+            base_prompt = """
+<functions>
+{func_info}
+</functions>
+<json_structure>
+{json_structure}
+</json_structure>
+<instructions>
+{instructions}
+</instructions>
+"""
+        prompt = base_prompt.format(
+            func_info=func_info,
+            json_structure=json_structure,
+            instructions=instructions,
+        )
+        self.planner_templates[key] = prompt
+        return prompt
+
     def _generate_prompt(self, question: str, instructions: str = "") -> str:
         func_info = [
             f"""--name:{function.name}\n--annotations:{function.signature}\n--doc:{function.docs}\n\n"""
@@ -166,7 +251,6 @@ class PipPlanner(PipBaseClass):
   ]
 }}
 </json_structure>
-<instructions>
 <instructions>
 - use self parameter with proper value based on the question.
 - name outputs as variable_1 , variable_2 , variable_3 , variable_4 and more variables in chronological order.
