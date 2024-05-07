@@ -23,7 +23,7 @@ class PipBaseClass:
         else:
             self._load_model()
 
-    def _query_model(self, prompt: str, max_new_tokens: int, eos_token: str) -> str:
+    def _query_model(self, prompt: str, max_new_tokens: int) -> str:
         if self.device == Device.CLOUD:
             payload = {
                 "model_name": self.model_key,
@@ -39,10 +39,7 @@ class PipBaseClass:
                 raise Exception(f"Error generating response using {self.url}.")
         elif self.device == Device.CUDA:
             inputs = self.tokenizer(prompt, return_tensors="pt").to(self.device.value)
-            encoded_eos = self.tokenizer.encode(eos_token)
-            outputs = self.model.generate(
-                **inputs, max_new_tokens=max_new_tokens, forced_eos_token_id=encoded_eos
-            )
+            outputs = self.model.generate(**inputs, max_new_tokens=max_new_tokens)
             return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
     def _load_model(self):
